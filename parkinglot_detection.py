@@ -29,7 +29,7 @@ PATH_TO_CKPT = os.path.join('/home/cyj/Project/data/Parkinglot20180201_Output', 
 
 # List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = os.path.join(CWD_PATH, 'object_detection', 'data', 'parkinglot_label_map.pbtxt')
-VIDEO_PATH='/home/cyj/Project/data/20180402/480p/VID_20180402_161540'
+VIDEO_PATH='/home/cyj/Project/data/20180402/480p/VID_20180402_160919'
 PATH_TO_OUTPUT_INFO = VIDEO_PATH+'.txt'
 white_output = VIDEO_PATH+'_out.mp4'
 video_input=VIDEO_PATH+'.mp4'
@@ -60,6 +60,12 @@ def output_detection_information(image_np,
                                  min_score_thresh=.65,
                                  agnostic_mode=False,
                                  line_thickness=8):
+    class_names=[]
+    scoreis=[]
+    ymins=[]
+    xmins=[]
+    ymaxs=[]
+    xmaxs=[]
     class_name=" "
     scorei=0
     ymin=0
@@ -92,13 +98,26 @@ def output_detection_information(image_np,
                 else:
                     display_str = 'score: {}%'.format(int(100 * scores[i]))
                 box_to_display_str_map[box].append(display_str)
+                class_names.append(class_name)
+                scoreis.append(scorei)
+                ymins.append(ymin)
+                xmins.append(xmin)
+                ymaxs.append(ymax)
+                xmaxs.append(xmax)
+    if(len(class_names)==0):
+        class_names.append(" ")
+        scoreis.append(0)
+        ymins.append(0)
+        xmins.append(0)
+        ymaxs.append(0)
+        xmaxs.append(0)
     #print("class_name:",class_name)
     #print("score:",scorei)
     #print("-------------")
     #print(display_str)
     #print(ymin,xmin,ymax,xmax)
     #return display_str,ymin,xmin,ymax,xmax
-    return class_name,scorei,ymin,xmin,ymax,xmax
+    return class_names, scoreis, ymins, xmins, ymaxs, xmaxs
 
 
 def detect_objects(image_np, sess, detection_graph):
@@ -142,18 +161,22 @@ def detect_objects(image_np, sess, detection_graph):
     # print(display_str,ymin,xmin,ymax,xmax)
 
     fp = open(PATH_TO_OUTPUT_INFO, "a")
-    fp.write(classname)
-    fp.write(' ')
-    fp.write(str(score))
-    fp.write(' ')
-    fp.write(str(ymin))
-    fp.write(' ')
-    fp.write(str(xmin))
-    fp.write(' ')
-    fp.write(str(ymax))
-    fp.write(' ')
-    fp.write(str(xmax))
-    fp.write('\n')
+    ob_num=len(classname)
+    nu=0
+    while nu<ob_num:
+        fp.write(classname[nu])
+        fp.write(' ')
+        fp.write(str(score[nu]))
+        fp.write(' ')
+        fp.write(str(ymin[nu]))
+        fp.write(' ')
+        fp.write(str(xmin[nu]))
+        fp.write(' ')
+        fp.write(str(ymax[nu]))
+        fp.write(' ')
+        fp.write(str(xmax[nu]))
+        fp.write('\n')
+        nu=nu+1
     fp.close()
     return image_np
 
